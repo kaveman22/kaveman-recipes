@@ -12,14 +12,24 @@ import time
 import shutil
 import json
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+env_path = Path(__file__).parent / '.env'
+if env_path.exists():
+    load_dotenv(dotenv_path=env_path)
 
 class VideoTextExtractor:
-    def __init__(self, temp_dir="temp_video_processing"):
+    def __init__(self, temp_dir=None):
         """Initialize the extractor with a temporary directory for processing."""
+        # Use environment variable for temp directory if not provided
+        if temp_dir is None:
+            temp_dir = os.getenv('OCR_TEMP_DIR', "temp_video_processing")
+        
         self.temp_dir = temp_dir
         self.frames_dir = os.path.join(temp_dir, "frames")
         
-    def extract_text_from_video(self, youtube_url, frame_rate=0.5, cleanup=True):
+    def extract_text_from_video(self, youtube_url, frame_rate=None, cleanup=True):
         """
         Extract text from a YouTube video.
         
@@ -31,6 +41,10 @@ class VideoTextExtractor:
         Returns:
             Dictionary with extracted text and metadata
         """
+        # Use environment variable for frame rate if not provided
+        if frame_rate is None:
+            frame_rate = float(os.getenv('OCR_FRAME_RATE', 0.5))
+            
         try:
             # Create temporary directories
             os.makedirs(self.temp_dir, exist_ok=True)
@@ -140,7 +154,7 @@ class VideoTextExtractor:
             print(f"Error cleaning up temporary files: {e}")
 
 
-def extract_text_from_youtube(youtube_url, output_file=None, frame_rate=0.5):
+def extract_text_from_youtube(youtube_url, output_file=None, frame_rate=None):
     """
     Extract text from a YouTube video and optionally save to a file.
     This function can be called from other scripts.
@@ -153,11 +167,18 @@ def extract_text_from_youtube(youtube_url, output_file=None, frame_rate=0.5):
     Returns:
         Dictionary with extracted text and metadata
     """
+    # Use environment variable for frame rate if not provided
+    if frame_rate is None:
+        frame_rate = float(os.getenv('OCR_FRAME_RATE', 0.5))
+        
     extractor = VideoTextExtractor()
     result = extractor.extract_text_from_video(youtube_url, frame_rate)
     
     # Save to file if requested
     if output_file:
+        # Create output directory if it doesn't exist
+        os.makedirs(os.path.dirname(os.path.abspath(output_file)), exist_ok=True)
+        
         with open(output_file, 'w', encoding='utf-8') as f:
             json.dump(result, f, indent=2)
         print(f"Results saved to {output_file}")
@@ -172,11 +193,30 @@ def main():
     parser = argparse.ArgumentParser(description='Extract text from YouTube videos using OCR.')
     parser.add_argument('url', help='YouTube video URL')
     parser.add_argument('--output', '-o', help='Output file path (JSON)')
-    parser.add_argument('--frame-rate', '-f', type=float, default=0.5, 
+    parser.add_argument('--frame-rate', '-f', type=float, 
+                        default=float(os.getenv('OCR_FRAME_RATE', 0.5)), 
                         help='Number of frames to extract per second (default: 0.5)')
+    parser.add_argument('--temp-dir', '-t', 
+                        default=os.getenv('OCR_TEMP_DIR', "temp_video_processing"), 
+                        help='Temporary directory for processing')
     args = parser.parse_args()
     
-    extract_text_from_youtube(args.url, args.output, args.frame_rate)
+    extractor = VideoTextExtractor(temp_dir=args.temp_dir)
+    result = extractor.extract_text_from_video(args.url, args.frame_rate)
+    
+    if args.output:
+        with open(args.output, 'w', encoding='utf-8') as f:
+            json.dump(result, f, indent=2)
+        print(f"Results saved to {args.output}")
+    else:
+        # Print a summary of the results
+        print(f"\nExtracted text from {len(result['extracted_text'])} frames:")
+        for i, item in enumerate(result['extracted_text'][:3]):  # Show first 3 results
+            print(f"\nFrame {item['frame_number']}:")
+            print(item['text'][:200] + ('...' if len(item['text']) > 200 else ''))
+        
+        if len(result['extracted_text']) > 3:
+            print(f"\n... and {len(result['extracted_text']) - 3} more frames with text")
 
 
 if __name__ == "__main__":

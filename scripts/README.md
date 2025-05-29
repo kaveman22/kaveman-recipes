@@ -30,19 +30,27 @@ Fetches YouTube video descriptions for KaynSpice recipes and stores them in a JS
 
 #### Setup:
 
-1. **Get a YouTube API Key**:
+1. **Environment Variables**:
+   - Copy `.env.example` to `.env`
+   - Edit `.env` and add your YouTube API key and other settings
+   ```
+   cp scripts/.env.example scripts/.env
+   nano scripts/.env
+   ```
+
+2. **Get a YouTube API Key**:
    - Go to the [Google Cloud Console](https://console.cloud.google.com/)
    - Create a new project or select an existing one
    - Enable the YouTube Data API v3
    - Create an API key
-   - Replace `YOUR_API_KEY_HERE` in the script with your actual API key
+   - Add it to your `.env` file as `YOUTUBE_API_KEY=your_key_here`
 
-2. **Install Required Packages**:
+3. **Install Required Packages**:
    ```bash
-   pip install requests
+   pip install requests python-dotenv
    ```
 
-3. **Usage**:
+4. **Usage**:
    ```bash
    # Basic usage (fetch descriptions only)
    python scripts/kaynspice_processor.py
@@ -52,6 +60,9 @@ Fetches YouTube video descriptions for KaynSpice recipes and stores them in a JS
    
    # With OCR text extraction (see below)
    python scripts/kaynspice_processor.py --extract-video-text
+   
+   # Override environment variables from command line
+   python scripts/kaynspice_processor.py --api-key "your_api_key" --frame-rate 1.0
    ```
 
 ### `video_text_extractor.py`
@@ -60,17 +71,24 @@ Module for extracting text from YouTube videos using OCR. Can be used standalone
 
 #### Setup for OCR:
 
-1. **Install Required Packages**:
-   ```bash
-   pip install opencv-python pytesseract yt-dlp
+1. **Environment Variables**:
+   - In your `.env` file, you can configure:
+   ```
+   OCR_FRAME_RATE=0.5
+   OCR_TEMP_DIR=temp_video_processing
    ```
 
-2. **Install Tesseract OCR**:
+2. **Install Required Packages**:
+   ```bash
+   pip install opencv-python pytesseract yt-dlp python-dotenv
+   ```
+
+3. **Install Tesseract OCR**:
    - macOS: `brew install tesseract`
    - Ubuntu: `sudo apt-get install tesseract-ocr`
    - Windows: Download from [GitHub](https://github.com/UB-Mannheim/tesseract/wiki)
 
-3. **Usage as Standalone**:
+4. **Usage as Standalone**:
    ```bash
    # Extract text from a YouTube video
    python scripts/video_text_extractor.py "https://www.youtube.com/watch?v=VIDEO_ID"
@@ -82,18 +100,34 @@ Module for extracting text from YouTube videos using OCR. Can be used standalone
    python scripts/video_text_extractor.py "https://www.youtube.com/watch?v=VIDEO_ID" --frame-rate 1
    ```
 
+## Environment Variables
+
+The scripts use the following environment variables from the `.env` file:
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `YOUTUBE_API_KEY` | Your YouTube API key | (required) |
+| `OCR_FRAME_RATE` | Number of frames to extract per second | 0.5 |
+| `OCR_TEMP_DIR` | Temporary directory for video processing | temp_video_processing |
+| `CSV_PATH` | Path to the CSV file with recipes | _data/kaynspice_recipes.csv |
+| `OUTPUT_PATH` | Path to save the output JSON file | _data/kaynspice_descriptions.json |
+
 ## Workflow Example
 
 Here's a complete workflow example for processing KaynSpice recipes:
 
 ```bash
-# 1. Convert a text list to CSV (if needed)
+# 1. Set up environment variables
+cp scripts/.env.example scripts/.env
+nano scripts/.env  # Add your YouTube API key
+
+# 2. Convert a text list to CSV (if needed)
 ./scripts/convert_to_csv.py recipe_list.txt _data/kaynspice_recipes.csv
 
-# 2. Fetch YouTube descriptions and extract text from videos
+# 3. Fetch YouTube descriptions and extract text from videos
 python scripts/kaynspice_processor.py --extract-video-text
 
-# 3. Convert recipes to markdown files
+# 4. Convert recipes to markdown files
 ./scripts/convert_kaynspice_to_md.py
 ```
 
@@ -117,6 +151,7 @@ When adding new scripts:
 - If you get API errors, check your API key and quota limits
 - YouTube API has daily quotas that may limit the number of videos you can process
 
-### Permission Issues
-- If you get permission errors, ensure scripts are executable: `chmod +x script_name.py`
-- For file access issues, check that paths are correct and you have write permissions
+### Environment Variables
+- If environment variables aren't being recognized, ensure your `.env` file is in the scripts directory
+- Check that you've installed the `python-dotenv` package
+- You can override any environment variable using command-line arguments

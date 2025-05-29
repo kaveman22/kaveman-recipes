@@ -10,6 +10,15 @@ import json
 import requests
 from urllib.parse import urlparse, parse_qs
 import argparse
+from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+env_path = Path(__file__).parent / '.env'
+if env_path.exists():
+    load_dotenv(dotenv_path=env_path)
+else:
+    print("Warning: .env file not found. Using default values or command line arguments.")
 
 # Import the video text extraction module
 try:
@@ -19,9 +28,8 @@ except ImportError:
     VIDEO_OCR_AVAILABLE = False
     print("Warning: video_text_extractor module not found. OCR functionality will be disabled.")
 
-# YouTube API key - you'll need to get one from Google Cloud Console
-# https://console.cloud.google.com/apis/credentials
-API_KEY = "YOUR_API_KEY_HERE"
+# Get YouTube API key from environment variable
+API_KEY = os.getenv('YOUTUBE_API_KEY', 'YOUR_API_KEY_HERE')
 
 def extract_video_id(youtube_url):
     """Extract the video ID from a YouTube URL."""
@@ -57,9 +65,13 @@ def get_video_description(video_id):
         print(f"Error fetching video description for {video_id}: {e}")
         return ""
 
-def process_recipes_csv(csv_path, extract_video_text=False):
+def process_recipes_csv(csv_path, extract_video_text=False, frame_rate=None):
     """Process the recipes CSV file and fetch YouTube descriptions."""
     recipes_data = []
+    
+    # Get frame rate from environment variable if not provided
+    if frame_rate is None:
+        frame_rate = float(os.getenv('OCR_FRAME_RATE', 0.5))
     
     with open(csv_path, 'r') as f:
         reader = csv.reader(f)
@@ -89,7 +101,7 @@ def process_recipes_csv(csv_path, extract_video_text=False):
                 if extract_video_text and VIDEO_OCR_AVAILABLE:
                     print(f"Extracting text from video frames for: {recipe_name}")
                     try:
-                        video_text_data = extract_text_from_youtube(youtube_url)
+                        video_text_data = extract_text_from_youtube(youtube_url, frame_rate=frame_rate)
                         recipe_data["video_text"] = video_text_data["extracted_text"]
                     except Exception as e:
                         print(f"Error extracting text from video: {e}")
@@ -101,20 +113,41 @@ def process_recipes_csv(csv_path, extract_video_text=False):
 
 def main():
     parser = argparse.ArgumentParser(description='Fetch YouTube video descriptions for KaynSpice recipes.')
-    parser.add_argument('--csv', default="_data/kaynspice_recipes.csv", help='Path to the CSV file containing recipes')
-    parser.add_argument('--output', default="_data/kaynspice_descriptions.json", help='Path to save the output JSON file')
-    parser.add_argument('--extract-video-text', action='store_true', help='Extract text from video frames using OCR')
+    parser.add_argument('--csv', default=os.getenv('CSV_PATH', "_data/kaynspice_recipes.csv"), 
+                        help='Path to the CSV file containing recipes')
+    parser.add_argument('--output', default=os.getenv('OUTPUT_PATH', "_data/kaynspice_descriptions.json"), 
+                        help='Path to save the output JSON file')
+    parser.add_argument('--extract-video-text', action='store_true', 
+                        help='Extract text from video frames using OCR')
+    parser.add_argument('--frame-rate', type=float, 
+                        default=float(os.getenv('OCR_FRAME_RATE', 0.5)), 
+                        help='Number of frames to extract per second for OCR')
+    parser.add_argument('--api-key', 
+                        help='YouTube API key (overrides environment variable)')
     args = parser.parse_args()
+    
+    # Override API key if provided via command line
+    global API_KEY
+    if args.api_key:
+        API_KEY = args.api_key
+    
+    # Check if API key is set
+    if API_KEY == 'YOUR_API_KEY_HERE':
+        print("Error: YouTube API key not set. Please set it in the .env file or provide it with --api-key.")
+        return
     
     # Check if OCR is requested but not available
     if args.extract_video_text and not VIDEO_OCR_AVAILABLE:
         print("Error: Video text extraction requested but the required module is not available.")
         print("Please install the necessary dependencies:")
-        print("pip install opencv-python pytesseract yt-dlp")
+        print("pip install opencv-python pytesseract yt-dlp python-dotenv")
         return
     
     # Process recipes
-    recipes_data = process_recipes_csv(args.csv, args.extract_video_text)
+    recipes_data = process_recipes_csv(args.csv, args.extract_video_text, args.frame_rate)
+    
+    # Create output directory if it doesn't exist
+    os.makedirs(os.path.dirname(os.path.abspath(args.output)), exist_ok=True)
     
     # Save to JSON file
     with open(args.output, 'w') as f:
