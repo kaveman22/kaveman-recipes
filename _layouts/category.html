@@ -1,0 +1,22 @@
+---
+layout: default
+---
+
+<h1>{{ page.category | capitalize }} Recipes</h1>
+
+<div class="recipe-list">
+  {% assign recipes = site.recipes | where: "category", page.category %}
+  {% for recipe in recipes %}
+    <div class="recipe-card">
+      <h3><a href="{{ recipe.url | relative_url }}">{{ recipe.title }}</a></h3>
+      <div class="recipe-meta">
+        <span class="time">{{ recipe.total_time }}</span>
+      </div>
+      <div class="tags">
+        {% for tag in recipe.tags %}
+          <span class="tag">{{ tag }}</span>
+        {% endfor %}
+      </div>
+    </div>
+  {% endfor %}
+</div>
