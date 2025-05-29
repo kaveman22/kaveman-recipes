@@ -8,6 +8,7 @@ import os
 import csv
 import json
 import requests
+from bs4 import BeautifulSoup
 from urllib.parse import urlparse, parse_qs
 import argparse
 from pathlib import Path
@@ -28,40 +29,59 @@ except ImportError:
     VIDEO_OCR_AVAILABLE = False
     print("Warning: video_text_extractor module not found. OCR functionality will be disabled.")
 
-# Get YouTube API key from environment variable
-API_KEY = os.getenv('YOUTUBE_API_KEY', 'YOUR_API_KEY_HERE')
-
 def extract_video_id(youtube_url):
     """Extract the video ID from a YouTube URL."""
     if "youtu.be" in youtube_url:
         # Handle youtu.be URLs
-        return youtube_url.split("/")[-1]
+        return youtube_url.split("/")[-1].split("?")[0]
     elif "youtube.com" in youtube_url:
         # Handle youtube.com URLs
         parsed_url = urlparse(youtube_url)
         if parsed_url.path == "/watch":
             return parse_qs(parsed_url.query)["v"][0]
         elif "embed" in parsed_url.path:
-            return parsed_url.path.split("/")[-1]
+            return parsed_url.path.split("/")[-1].split("?")[0]
     
     # If we can't extract the ID, return the original URL
     return youtube_url
 
 def get_video_description(video_id):
-    """Fetch the video description from YouTube API."""
-    url = f"https://www.googleapis.com/youtube/v3/videos?part=snippet&id={video_id}&key={API_KEY}"
+    """Fetch the video description by scraping the YouTube page."""
+    url = f"https://www.youtube.com/watch?v={video_id}"
     
     try:
-        response = requests.get(url)
-        response.raise_for_status()  # Raise an exception for HTTP errors
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        }
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
         
-        data = response.json()
-        if "items" in data and len(data["items"]) > 0:
-            return data["items"][0]["snippet"]["description"]
-        else:
-            print(f"No description found for video ID: {video_id}")
-            return ""
-    except requests.exceptions.RequestException as e:
+        soup = BeautifulSoup(response.text, 'html.parser')
+        
+        # Try to find the description in the page
+        # First try the meta description
+        description_meta = soup.find('meta', {'name': 'description'})
+        if description_meta and 'content' in description_meta.attrs:
+            return description_meta['content']
+        
+        # Alternative method - look for specific elements that might contain the description
+        # These selectors might need adjustment as YouTube's structure changes
+        selectors = [
+            'span#description-text',
+            'div#description-text',
+            'div#description',
+            'div.description',
+            '[itemprop="description"]'
+        ]
+        
+        for selector in selectors:
+            description_element = soup.select_one(selector)
+            if description_element:
+                return description_element.text.strip()
+        
+        print(f"No description found for video ID: {video_id}")
+        return ""
+    except Exception as e:
         print(f"Error fetching video description for {video_id}: {e}")
         return ""
 
@@ -122,25 +142,13 @@ def main():
     parser.add_argument('--frame-rate', type=float, 
                         default=float(os.getenv('OCR_FRAME_RATE', 0.5)), 
                         help='Number of frames to extract per second for OCR')
-    parser.add_argument('--api-key', 
-                        help='YouTube API key (overrides environment variable)')
     args = parser.parse_args()
-    
-    # Override API key if provided via command line
-    global API_KEY
-    if args.api_key:
-        API_KEY = args.api_key
-    
-    # Check if API key is set
-    if API_KEY == 'YOUR_API_KEY_HERE':
-        print("Error: YouTube API key not set. Please set it in the .env file or provide it with --api-key.")
-        return
     
     # Check if OCR is requested but not available
     if args.extract_video_text and not VIDEO_OCR_AVAILABLE:
         print("Error: Video text extraction requested but the required module is not available.")
         print("Please install the necessary dependencies:")
-        print("pip install opencv-python pytesseract yt-dlp python-dotenv")
+        print("pip install opencv-python pytesseract yt-dlp python-dotenv beautifulsoup4")
         return
     
     # Process recipes

@@ -32,25 +32,18 @@ Fetches YouTube video descriptions for KaynSpice recipes and stores them in a JS
 
 1. **Environment Variables**:
    - Copy `.env.example` to `.env`
-   - Edit `.env` and add your YouTube API key and other settings
+   - Edit `.env` to customize settings if needed
    ```
    cp scripts/.env.example scripts/.env
    nano scripts/.env
    ```
 
-2. **Get a YouTube API Key**:
-   - Go to the [Google Cloud Console](https://console.cloud.google.com/)
-   - Create a new project or select an existing one
-   - Enable the YouTube Data API v3
-   - Create an API key
-   - Add it to your `.env` file as `YOUTUBE_API_KEY=your_key_here`
-
-3. **Install Required Packages**:
+2. **Install Required Packages**:
    ```bash
-   pip install requests python-dotenv
+   pip install -r scripts/requirements.txt
    ```
 
-4. **Usage**:
+3. **Usage**:
    ```bash
    # Basic usage (fetch descriptions only)
    python scripts/kaynspice_processor.py
@@ -60,9 +53,6 @@ Fetches YouTube video descriptions for KaynSpice recipes and stores them in a JS
    
    # With OCR text extraction (see below)
    python scripts/kaynspice_processor.py --extract-video-text
-   
-   # Override environment variables from command line
-   python scripts/kaynspice_processor.py --api-key "your_api_key" --frame-rate 1.0
    ```
 
 ### `video_text_extractor.py`
@@ -80,7 +70,7 @@ Module for extracting text from YouTube videos using OCR. Can be used standalone
 
 2. **Install Required Packages**:
    ```bash
-   pip install opencv-python pytesseract yt-dlp python-dotenv
+   pip install -r scripts/requirements.txt
    ```
 
 3. **Install Tesseract OCR**:
@@ -106,7 +96,6 @@ The scripts use the following environment variables from the `.env` file:
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `YOUTUBE_API_KEY` | Your YouTube API key | (required) |
 | `OCR_FRAME_RATE` | Number of frames to extract per second | 0.5 |
 | `OCR_TEMP_DIR` | Temporary directory for video processing | temp_video_processing |
 | `CSV_PATH` | Path to the CSV file with recipes | _data/kaynspice_recipes.csv |
@@ -119,15 +108,17 @@ Here's a complete workflow example for processing KaynSpice recipes:
 ```bash
 # 1. Set up environment variables
 cp scripts/.env.example scripts/.env
-nano scripts/.env  # Add your YouTube API key
 
-# 2. Convert a text list to CSV (if needed)
+# 2. Install dependencies
+pip install -r scripts/requirements.txt
+
+# 3. Convert a text list to CSV (if needed)
 ./scripts/convert_to_csv.py recipe_list.txt _data/kaynspice_recipes.csv
 
-# 3. Fetch YouTube descriptions and extract text from videos
+# 4. Fetch YouTube descriptions and extract text from videos
 python scripts/kaynspice_processor.py --extract-video-text
 
-# 4. Convert recipes to markdown files
+# 5. Convert recipes to markdown files
 ./scripts/convert_kaynspice_to_md.py
 ```
 
@@ -147,9 +138,10 @@ When adding new scripts:
 - Ensure Tesseract is properly installed and in your PATH
 - For better results with specific videos, you may need to adjust preprocessing in the script
 
-### YouTube API Issues
-- If you get API errors, check your API key and quota limits
-- YouTube API has daily quotas that may limit the number of videos you can process
+### YouTube Scraping Issues
+- If descriptions aren't being extracted correctly, YouTube may have changed their page structure
+- Try updating the selectors in the `get_video_description` function
+- YouTube may temporarily block requests if too many are made in a short time
 
 ### Environment Variables
 - If environment variables aren't being recognized, ensure your `.env` file is in the scripts directory
