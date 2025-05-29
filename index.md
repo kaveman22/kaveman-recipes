@@ -23,6 +23,14 @@ Welcome to my recipe collection! Here you'll find a variety of recipes with deta
   {% assign recipes = site.recipes | sort: "date" | reverse %}
   {% for recipe in recipes limit:6 %}
     <div class="recipe-card">
+      {% if recipe.source_url contains "youtu" %}
+        {% assign youtube_id = recipe.source_url | split: "/" | last %}
+        <div class="recipe-thumbnail">
+          <a href="{{ recipe.url | relative_url }}">
+            <img src="https://img.youtube.com/vi/{{ youtube_id }}/mqdefault.jpg" alt="{{ recipe.title }}">
+          </a>
+        </div>
+      {% endif %}
       <h3><a href="{{ recipe.url | relative_url }}">{{ recipe.title }}</a></h3>
       <div class="recipe-meta">
         <span class="category">{{ recipe.category }}</span>

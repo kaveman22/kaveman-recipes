@@ -167,6 +167,24 @@ main {
   border-radius: 8px;
 }
 
+/* Recipe thumbnail */
+.recipe-thumbnail {
+  margin-bottom: 1rem;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.recipe-thumbnail img {
+  width: 100%;
+  height: auto;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.recipe-thumbnail:hover img {
+  transform: scale(1.05);
+}
+
 /* Enhanced Search styles */
 .search-container {
   margin-bottom: 2rem;

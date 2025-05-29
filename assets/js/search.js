@@ -249,7 +249,21 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
       }
       
+      // Add YouTube thumbnail if available
+      let thumbnailHtml = '';
+      if (recipe.source_url && recipe.source_url.includes('youtu')) {
+        const videoId = recipe.source_url.split('/').pop();
+        thumbnailHtml = `
+          <div class="recipe-thumbnail">
+            <a href="${recipe.url}">
+              <img src="https://img.youtube.com/vi/${videoId}/mqdefault.jpg" alt="${recipe.title}">
+            </a>
+          </div>
+        `;
+      }
+      
       resultItem.innerHTML = `
+        ${thumbnailHtml}
         <h3><a href="${recipe.url}">${recipe.title}</a></h3>
         <div class="recipe-meta">
           <span class="category">${recipe.category}</span>
