@@ -1,0 +1,69 @@
+# Jekyll build files
+_site/
+.sass-cache/
+.jekyll-cache/
+.jekyll-metadata
+vendor/
+.bundle/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Editor directories and files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Sensitive or personal data
+*.env
+.env.*
+secrets.yml
+credentials.json
+personal_notes.md
+private_recipes.md
+**/private/
+
+# Temporary files
+*.log
+*.tmp
+tmp/
+temp/
+
+# Original data files that might contain sensitive information
+/Recipes - Master Recipe Sheet.csv
+/Untitled document.txt
+original_data/
+
+# Backup files
+*.bak
+*.backup
+*-backup.*
+
+# Large binary files
+*.zip
+*.tar.gz
+*.rar
+*.mp4
+*.mov
+
+# Node modules if using any JavaScript tools
+node_modules/
+
+# Python virtual environments
+venv/
+env/
+.env/
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python

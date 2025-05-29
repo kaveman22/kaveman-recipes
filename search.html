@@ -1,0 +1,15 @@
+---
+layout: default
+title: Search Recipes
+permalink: /search/
+---
+
+<h1>Search Recipes</h1>
+
+<div class="search-container">
+  <input type="text" id="search-input" placeholder="Search recipes, ingredients, or alternatives...">
+  <div id="search-results"></div>
+</div>
+
+<script src="https://unpkg.com/lunr/lunr.js"></script>
+<script src="{{ '/assets/js/search.js' | relative_url }}"></script>

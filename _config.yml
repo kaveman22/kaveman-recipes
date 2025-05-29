@@ -1,0 +1,34 @@
+title: My Recipe Collection
+description: A searchable collection of recipes with ingredient alternatives
+baseurl: ""
+url: ""
+
+# Build settings
+markdown: kramdown
+permalink: pretty
+
+collections:
+  recipes:
+    output: true
+    permalink: /recipes/:path/
+
+defaults:
+  - scope:
+      path: ""
+      type: "recipes"
+    values:
+      layout: "recipe"
+
+# Enable searching through ingredients and alternatives
+include_ingredients_in_search: true
+
+# Exclude files from processing
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
+  - .gitignore
+  - README.md
+  - "Recipes - Master Recipe Sheet.csv"
+  - recipe_template.md

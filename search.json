@@ -1,0 +1,26 @@
+---
+layout: null
+---
+[
+  {% for recipe in site.recipes %}
+    {
+      "title": {{ recipe.title | jsonify }},
+      "category": {{ recipe.category | jsonify }},
+      "url": {{ recipe.url | prepend: site.baseurl | jsonify }},
+      "ingredients": [
+        {% for ingredient in recipe.ingredients %}
+          {
+            "name": {{ ingredient.name | jsonify }},
+            "alternatives": [
+              {% for alt in ingredient.alternatives %}
+                {{ alt | jsonify }}{% unless forloop.last %},{% endunless %}
+              {% endfor %}
+            ]
+          }{% unless forloop.last %},{% endunless %}
+        {% endfor %}
+      ],
+      "tags": {{ recipe.tags | jsonify }},
+      "content": {{ recipe.content | strip_html | strip_newlines | jsonify }}
+    }{% unless forloop.last %},{% endunless %}
+  {% endfor %}
+]
