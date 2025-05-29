@@ -23,7 +23,7 @@ title: [Recipe Name]
 category: [Category]  # Use proper capitalization, spaces are fine here
 date: [Current Date]
 source: KaynSpice
-source_url: [YouTube URL]
+source_url: [YouTube URL]  # Must be the full YouTube URL for video embedding
 ingredients:
   - name: [Ingredient Name]
     amount: [Amount]
@@ -58,7 +58,13 @@ servings: [Number]
 - Additional notes
 ```
 
-### 5. Category Management
+### 5. YouTube Video Embedding
+- Ensure the `source_url` in the front matter contains the full YouTube URL
+- The template will automatically extract the YouTube video ID and create an embedded player
+- The video will appear at the top of the recipe page, below the title
+- Format should be: `https://youtu.be/VIDEO_ID` or `https://www.youtube.com/watch?v=VIDEO_ID`
+
+### 6. Category Management
 - If recipe belongs to a new category:
   1. Create category folder in `_recipes/` using kebab-case (e.g., `middle-eastern`)
   2. Create category page in `/categories/` with the same kebab-case name
@@ -68,7 +74,7 @@ servings: [Number]
      ```
   4. Update CSS for any category-specific styling
 
-### 6. URL Handling
+### 7. URL Handling
 - **Critical**: For multi-word categories, always use kebab-case (hyphens) in:
   - Directory names
   - File names
@@ -76,7 +82,7 @@ servings: [Number]
   - URL references
 - Example: "Middle Eastern" category should be referenced as `middle-eastern` in URLs and file paths
 
-### 7. Git Workflow
+### 8. Git Workflow
 ```bash
 # Stage the new files
 git add _recipes/[category]/[recipe-name].md
@@ -96,7 +102,7 @@ git push
 Here's an example of adding the "Sticky Mango Jerk Chicken Wings" recipe:
 
 1. Create file: `_recipes/jamaican/sticky-mango-jerk-chicken-wings.md`
-2. Add front matter with recipe details
+2. Add front matter with recipe details including YouTube URL
 3. Structure content with ingredients and steps
 4. Add to git and push changes
 
@@ -115,10 +121,12 @@ For a multi-word category like "Middle Eastern":
 - Make sure images (if any) are optimized
 - Keep formatting consistent across recipes
 - **Always use kebab-case for URLs and file paths**
+- Ensure YouTube URLs are correctly formatted for proper video embedding
 
 ## Quality Checklist
 
 - [ ] Front matter complete and valid
+- [ ] YouTube URL correctly formatted in source_url
 - [ ] All ingredients listed with amounts
 - [ ] Clear, step-by-step instructions
 - [ ] Proper categorization
@@ -127,6 +135,7 @@ For a multi-word category like "Middle Eastern":
 - [ ] Category slug properly formatted (kebab-case)
 - [ ] Local build successful
 - [ ] Preview looks correct
+- [ ] Video embeds and plays correctly
 - [ ] Changes committed and pushed
 
 ## Automation Tools
@@ -141,3 +150,4 @@ The `scripts/` directory contains helpful tools:
 - [Jekyll Documentation](https://jekyllrb.com/docs/)
 - [Markdown Guide](https://www.markdownguide.org/)
 - [KaynSpice YouTube Channel](https://www.youtube.com/@KaynSpice)
+- [YouTube Embed Parameters](https://developers.google.com/youtube/player_parameters)

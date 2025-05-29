@@ -5,6 +5,14 @@ layout: default
 <article class="recipe">
   <header class="recipe-header">
     <h1>{{ page.title }}</h1>
+    
+    {% if page.source_url contains "youtu" %}
+      {% assign youtube_id = page.source_url | split: "/" | last %}
+      <div class="video-container">
+        <iframe width="100%" height="400" src="https://www.youtube.com/embed/{{ youtube_id }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      </div>
+    {% endif %}
+    
     <div class="recipe-meta">
       <span class="category">{{ page.category }}</span>
       <span class="prep-time">Prep: {{ page.prep_time }}</span>
