@@ -12,7 +12,8 @@ Welcome to my recipe collection! Here you'll find a variety of recipes with deta
 {% assign categories = site.recipes | map: "category" | uniq | sort %}
 <ul class="category-list">
   {% for category in categories %}
-    <li><a href="{{ '/categories/' | append: category | downcase | relative_url }}">{{ category }}</a></li>
+    {% assign category_slug = category | downcase | replace: ' ', '-' %}
+    <li><a href="{{ '/categories/' | append: category_slug | relative_url }}">{{ category }}</a></li>
   {% endfor %}
 </ul>
 

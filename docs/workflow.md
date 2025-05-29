@@ -13,13 +13,14 @@ This document outlines the process for adding new recipes to the collection from
 - Create a new markdown file in the appropriate category folder
 - Use kebab-case for the filename (e.g., `sticky-mango-jerk-chicken-wings.md`)
 - Place file in `_recipes/[category]/` directory
+- **Important**: Category folder names should be kebab-case (hyphenated) for multi-word categories (e.g., `middle-eastern`)
 
 ### 3. Front Matter Structure
 ```yaml
 ---
 layout: recipe
 title: [Recipe Name]
-category: [Category]
+category: [Category]  # Use proper capitalization, spaces are fine here
 date: [Current Date]
 source: KaynSpice
 source_url: [YouTube URL]
@@ -59,17 +60,29 @@ servings: [Number]
 
 ### 5. Category Management
 - If recipe belongs to a new category:
-  1. Create category page in `/categories/`
-  2. Add category to navigation if needed
-  3. Update CSS for any category-specific styling
+  1. Create category folder in `_recipes/` using kebab-case (e.g., `middle-eastern`)
+  2. Create category page in `/categories/` with the same kebab-case name
+  3. Set the permalink in the category page to match the kebab-case format:
+     ```yaml
+     permalink: /categories/middle-eastern/
+     ```
+  4. Update CSS for any category-specific styling
 
-### 6. Git Workflow
+### 6. URL Handling
+- **Critical**: For multi-word categories, always use kebab-case (hyphens) in:
+  - Directory names
+  - File names
+  - Permalinks
+  - URL references
+- Example: "Middle Eastern" category should be referenced as `middle-eastern` in URLs and file paths
+
+### 7. Git Workflow
 ```bash
 # Stage the new files
 git add _recipes/[category]/[recipe-name].md
 
 # If new category was created
-git add categories/[category].md
+git add categories/[category-slug].md
 
 # Commit changes
 git commit -m "Add [recipe name] recipe"
@@ -87,6 +100,11 @@ Here's an example of adding the "Sticky Mango Jerk Chicken Wings" recipe:
 3. Structure content with ingredients and steps
 4. Add to git and push changes
 
+For a multi-word category like "Middle Eastern":
+1. Create directory: `_recipes/middle-eastern/`
+2. Create file: `_recipes/middle-eastern/spicy-roasted-garlic-chicken-shawarma.md`
+3. Create category page: `categories/middle-eastern.md` with permalink `/categories/middle-eastern/`
+
 ## Tips
 
 - Always watch the video completely before starting
@@ -96,6 +114,7 @@ Here's an example of adding the "Sticky Mango Jerk Chicken Wings" recipe:
 - Test the recipe page locally before pushing
 - Make sure images (if any) are optimized
 - Keep formatting consistent across recipes
+- **Always use kebab-case for URLs and file paths**
 
 ## Quality Checklist
 
@@ -105,6 +124,7 @@ Here's an example of adding the "Sticky Mango Jerk Chicken Wings" recipe:
 - [ ] Proper categorization
 - [ ] Relevant tags added
 - [ ] Source URL correct
+- [ ] Category slug properly formatted (kebab-case)
 - [ ] Local build successful
 - [ ] Preview looks correct
 - [ ] Changes committed and pushed
