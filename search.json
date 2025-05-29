@@ -7,6 +7,8 @@ layout: null
       "title": {{ recipe.title | jsonify }},
       "category": {{ recipe.category | jsonify }},
       "url": {{ recipe.url | prepend: site.baseurl | jsonify }},
+      "source_url": {{ recipe.source_url | jsonify }},
+      "total_time": {{ recipe.total_time | jsonify }},
       "ingredients": [
         {% for ingredient in recipe.ingredients %}
           {

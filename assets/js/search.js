@@ -252,14 +252,42 @@ document.addEventListener('DOMContentLoaded', function() {
       // Add YouTube thumbnail if available
       let thumbnailHtml = '';
       if (recipe.source_url && recipe.source_url.includes('youtu')) {
-        const videoId = recipe.source_url.split('/').pop();
-        thumbnailHtml = `
-          <div class="recipe-thumbnail">
-            <a href="${recipe.url}">
-              <img src="https://img.youtube.com/vi/${videoId}/mqdefault.jpg" alt="${recipe.title}">
-            </a>
-          </div>
-        `;
+        // More robust YouTube ID extraction
+        let videoId;
+        
+        try {
+          if (recipe.source_url.includes('youtu.be/')) {
+            videoId = recipe.source_url.split('youtu.be/')[1];
+            if (videoId && videoId.includes('?')) videoId = videoId.split('?')[0];
+          } else if (recipe.source_url.includes('youtube.com/watch')) {
+            const urlParts = recipe.source_url.split('v=');
+            if (urlParts.length > 1) {
+              videoId = urlParts[1];
+              if (videoId && videoId.includes('&')) videoId = videoId.split('&')[0];
+            }
+          } else if (recipe.source_url.includes('youtube.com/embed/')) {
+            videoId = recipe.source_url.split('youtube.com/embed/')[1];
+            if (videoId && videoId.includes('?')) videoId = videoId.split('?')[0];
+          } else {
+            // Fallback to the last segment of the URL
+            videoId = recipe.source_url.split('/').pop();
+          }
+          
+          // Clean up the video ID
+          if (videoId) {
+            videoId = videoId.trim();
+            
+            thumbnailHtml = `
+              <div class="recipe-thumbnail">
+                <a href="${recipe.url}">
+                  <img src="https://img.youtube.com/vi/${videoId}/mqdefault.jpg" alt="${recipe.title}">
+                </a>
+              </div>
+            `;
+          }
+        } catch (e) {
+          console.error('Error extracting YouTube ID:', e);
+        }
       }
       
       resultItem.innerHTML = `
